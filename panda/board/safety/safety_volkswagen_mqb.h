@@ -272,7 +272,7 @@ static int volkswagen_mqb_fwd_hook(int bus_num, int addr) {
         bus_fwd = -1;
       } else {
         // Forward all remaining traffic from Extended CAN onward
-        bus_fwd = 2;
+        bus_fwd = -1;
       }
       break;
     case 2:
