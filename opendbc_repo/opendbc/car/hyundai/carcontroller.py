@@ -91,7 +91,7 @@ class CarController(CarControllerBase, EsccCarController, MadsCarController):
     else:
       new_angle = actuators.steeringAngleDeg
       # Example values for curvature-based torque scaling (tune these as needed)
-      speed_multiplier = np.interp(CS.out.vEgoRaw, [0, 16.67, 30.0], [1.0, 1.4, 1.8])
+      speed_multiplier = np.interp(CS.out.vEgoRaw, [0, 16.67, 30.0], [1.2, 1.6, 1.8])
       CURVATURE_BREAKPOINTS = [0.0, 0.003, 0.01, 0.018, 0.025]
 
       # Define torque values at different curvature breakpoints factoring in speed.
