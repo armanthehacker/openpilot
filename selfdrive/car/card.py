@@ -26,6 +26,7 @@ from openpilot.selfdrive.car.helpers import convert_carControlSP, convert_to_cap
 
 from openpilot.sunnypilot.mads.helpers import set_alternative_experience, set_car_specific_params
 from openpilot.sunnypilot.selfdrive.car import interfaces as sunnypilot_interfaces
+from openpilot.sunnypilot.selfdrive.car.card_ext import CarExt
 
 REPLAY = "REPLAY" in os.environ
 
@@ -64,7 +65,7 @@ def can_comm_callbacks(logcan: messaging.SubSocket, sendcan: messaging.PubSocket
   return can_recv, can_send
 
 
-class Car:
+class Car(CarExt):
   CI: CarInterfaceBase
   RI: RadarInterfaceBase
   CP: car.CarParams
@@ -72,6 +73,7 @@ class Car:
   CP_SP_capnp: custom.CarParamsSP
 
   def __init__(self, CI=None, RI=None) -> None:
+    CarExt.__init__(self)
     self.can_sock = messaging.sub_sock('can', timeout=20)
     self.sm = messaging.SubMaster(['pandaStates', 'carControl', 'onroadEvents'] + ['carControlSP'])
     self.pm = messaging.PubMaster(['sendcan', 'carState', 'carParams', 'carOutput', 'liveTracks'] + ['carParamsSP'])
@@ -129,8 +131,8 @@ class Car:
     set_alternative_experience(self.CP, self.params)
     set_car_specific_params(self.CP, self.CP_SP, self.params)
 
-    # Dynamic Experimental Control
-    self.dynamic_experimental_control = self.params.get_bool("DynamicExperimentalControl")
+    # Load sunnypilot params
+    self.read_sunnypilot_params()
 
     openpilot_enabled_toggle = self.params.get_bool("OpenpilotEnabledToggle")
 
@@ -173,14 +175,6 @@ class Car:
     self.params.put("CarParams", cp_bytes)
     self.params.put_nonblocking("CarParamsCache", cp_bytes)
     self.params.put_nonblocking("CarParamsPersistent", cp_bytes)
-
-    # Write CarParamsSP for controls
-    # convert to pycapnp representation for caching and logging
-    self.CP_SP_capnp = convert_to_capnp(self.CP_SP)
-    cp_sp_bytes = self.CP_SP_capnp.to_bytes()
-    self.params.put("CarParamsSP", cp_sp_bytes)
-    self.params.put_nonblocking("CarParamsSPCache", cp_sp_bytes)
-    self.params.put_nonblocking("CarParamsSPPersistent", cp_sp_bytes)
 
     self.mock_carstate = MockCarState()
     self.v_cruise_helper = VCruiseHelper(self.CP)
@@ -304,8 +298,8 @@ class Car:
       self.is_metric = self.params.get_bool("IsMetric")
       self.experimental_mode = self.params.get_bool("ExperimentalMode") and self.CP.openpilotLongitudinalControl
 
-      # sunnypilot
-      self.dynamic_experimental_control = self.params.get_bool("DynamicExperimentalControl")
+      # Load sunnypilot params
+      self.read_sunnypilot_params()
 
       time.sleep(0.1)
 
