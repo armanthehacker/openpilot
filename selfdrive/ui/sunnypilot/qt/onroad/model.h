@@ -18,5 +18,8 @@ public:
 private:
   void update_leads(const cereal::RadarState::Reader &radar_state, const cereal::XYZTData::Reader &line);
   void update_model(const cereal::ModelDataV2::Reader &model, const cereal::RadarState::LeadData::Reader &lead);
-  void drawPath(QPainter &painter, const cereal::ModelDataV2::Reader &model, int height);
+  void drawPath(QPainter &painter, const cereal::ModelDataV2::Reader &model, int height, int width);
+
+  QPolygonF left_blindspot_vertices;
+  QPolygonF right_blindspot_vertices;
 };

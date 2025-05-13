@@ -42,7 +42,7 @@ void ModelRendererSP::draw(QPainter &painter, const QRect &surface_rect) {
 
   update_model(model, lead_one);
   drawLaneLines(painter);
-  drawPath(painter, model, surface_rect.height());
+  drawPath(painter, model, surface_rect.height(), surface_rect.width());
 
 
   if (longitudinal_control && sm.alive("radarState")) {
@@ -89,6 +89,12 @@ void ModelRendererSP::update_model(const cereal::ModelDataV2::Reader &model, con
     mapLineToPolygon(road_edges[i], 0.025, 0, &road_edge_vertices[i], max_idx);
   }
 
+  // update blindspot vertices
+  int max_distance_barrier =  100;
+  int max_idx_barrier = std::min(max_idx, get_path_length_idx(lane_lines[0], max_distance_barrier));
+  mapLineToPolygon(model.getLaneLines()[1], 0.2, -0.05, &left_blindspot_vertices, max_idx_barrier);
+  mapLineToPolygon(model.getLaneLines()[2], 0.2, -0.05, &right_blindspot_vertices, max_idx_barrier);
+
   // update path
   if (lead.getStatus()) {
     const float lead_d = lead.getDRel() * 2.;
@@ -98,8 +104,34 @@ void ModelRendererSP::update_model(const cereal::ModelDataV2::Reader &model, con
   mapLineToPolygon(model_position, 0.9, path_offset_z, &track_vertices, max_idx, false);
 }
 
-void ModelRendererSP::drawPath(QPainter &painter, const cereal::ModelDataV2::Reader &model, int height) {
+void ModelRendererSP::drawPath(QPainter &painter, const cereal::ModelDataV2::Reader &model, int height, int width) {
   QLinearGradient bg(0, height, 0, 0);
+  auto *s = uiState();
+  auto &sm = *(s->sm);
+  bool blindspot = Params().getBool("BlindSpot");
+
+  if (blindspot) {
+    bool left_blindspot = sm["carState"].getCarState().getLeftBlindspot();
+    bool right_blindspot = sm["carState"].getCarState().getRightBlindspot();
+
+    //painter.setBrush(QColor::fromRgbF(1.0, 0.0, 0.0, 0.4));  // Red with alpha for blind spot
+
+    if (left_blindspot && !left_blindspot_vertices.isEmpty()) {
+      QLinearGradient gradient(0, 0, width, 0);  // Horizontal gradient from left to right
+      gradient.setColorAt(0.0, QColor(255, 165, 0, 102));   // Orange with alpha
+      gradient.setColorAt(1.0, QColor(255, 255, 0, 102));   // Yellow with alpha
+      painter.setBrush(gradient);
+      painter.drawPolygon(left_blindspot_vertices);
+    }
+
+    if (right_blindspot && !right_blindspot_vertices.isEmpty()) {
+      QLinearGradient gradient(width, 0, 0, 0);  // Horizontal gradient from right to left
+      gradient.setColorAt(0.0, QColor(255, 165, 0, 102));   // Orange with alpha
+      gradient.setColorAt(1.0, QColor(255, 255, 0, 102));   // Yellow with alpha
+      painter.setBrush(gradient);
+      painter.drawPolygon(right_blindspot_vertices);
+    }
+  }
   if (experimental_mode) {
     // The first half of track_vertices are the points for the right side of the path
     const auto &acceleration = model.getAcceleration().getX();
