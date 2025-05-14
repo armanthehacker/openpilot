@@ -116,6 +116,7 @@ def _custom_acc_controls(CP_SP: structs.CarParamsSP, params: Params = None) -> N
 
   try:
     custom_enabled = params.get_bool("CustomAccIncrementsEnabled")
+    flip_enabled = params.get_bool("CustomAccFlipIncrements")
     short_inc = int(params.get("CustomAccShortPressIncrement"))
     long_inc = int(params.get("CustomAccLongPressIncrement"))
 
@@ -124,9 +125,12 @@ def _custom_acc_controls(CP_SP: structs.CarParamsSP, params: Params = None) -> N
 
   except Exception:
     custom_enabled = False
+    flip_enabled = False
     short_inc = 1
     long_inc = 10 if is_metric else 5
 
-  CP_SP.customAccControl.mode = structs.CarParamsSP.CustomAccControl.Mode.custom if custom_enabled else structs.CarParamsSP.CustomAccControl.Mode.disabled
+  CP_SP.customAccControl.mode = structs.CarParamsSP.CustomAccControl.Mode.reverse if flip_enabled \
+                                  else structs.CarParamsSP.CustomAccControl.Mode.custom if custom_enabled \
+                                    else structs.CarParamsSP.CustomAccControl.Mode.disabled
   CP_SP.customAccControl.increments.shortIncrement = short_inc
   CP_SP.customAccControl.increments.longIncrement = long_inc

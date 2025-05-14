@@ -129,7 +129,6 @@ inline static std::unordered_map<std::string, uint32_t> keys = {
     {"CarParamsSPPersistent", PERSISTENT},
     {"CarPlatformBundle", PERSISTENT},
     {"EnableGithubRunner", PERSISTENT | BACKUP},
-    {"FlipAccIncrements", PERSISTENT | BACKUP},
     {"MaxTimeOffroad", PERSISTENT | BACKUP},
     {"ModelRunnerTypeCache", CLEAR_ON_ONROAD_TRANSITION},
     {"OffroadMode", CLEAR_ON_MANAGER_START},
@@ -139,6 +138,7 @@ inline static std::unordered_map<std::string, uint32_t> keys = {
     {"CustomAccIncrementsEnabled", PERSISTENT | BACKUP},
     {"CustomAccLongPressIncrement", PERSISTENT | BACKUP},
     {"CustomAccShortPressIncrement", PERSISTENT | BACKUP},
+    {"CustomAccFlipIncrements", PERSISTENT | BACKUP},
 
     // MADS params
     {"Mads", PERSISTENT | BACKUP},
