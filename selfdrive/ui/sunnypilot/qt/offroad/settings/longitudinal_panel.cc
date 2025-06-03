@@ -8,4 +8,53 @@
 #include "selfdrive/ui/sunnypilot/qt/offroad/settings/longitudinal_panel.h"
 
 LongitudinalPanel::LongitudinalPanel(QWidget *parent) : QWidget(parent) {
+
+  main_layout = new QStackedLayout(this);
+  ListWidget *list = new ListWidget(this, false);
+
+  cruisePanelScreen = new QWidget(this);
+  QVBoxLayout* vlayout = new QVBoxLayout(cruisePanelScreen);
+  vlayout->setContentsMargins(50, 20, 50, 20);
+
+  cruisePanelScroller = new ScrollViewSP(list, this);
+  vlayout->addWidget(cruisePanelScroller);
+
+  customAccIncrement = new CustomAccIncrement(
+    "CustomAccIncrementsEnabled",
+    tr("Custom ACC Speed Increments"),
+    "",
+    "",
+    this);
+  list->addItem(customAccIncrement);
+  main_layout->addWidget(cruisePanelScreen);
+  main_layout->setCurrentWidget(cruisePanelScreen);
+  refresh();
+}
+
+void LongitudinalPanel::showEvent(QShowEvent *event) {
+  main_layout->setCurrentWidget(cruisePanelScreen);
+  refresh();
+}
+
+void LongitudinalPanel::refresh() {
+  auto cp_bytes = params.get("CarParamsPersistent");
+  bool has_longitudinal_control;
+  if (!cp_bytes.empty()) {
+    AlignedBuffer aligned_buf;
+    capnp::FlatArrayMessageReader cmsg(aligned_buf.align(cp_bytes.data(), cp_bytes.size()));
+    cereal::CarParams::Reader CP = cmsg.getRoot<cereal::CarParams>();
+    has_longitudinal_control = hasLongitudinalControl(CP);
+  } else {
+    has_longitudinal_control = false;
+  }
+  QString accEnabledDescription = tr("Enable custom Short & Long press increments for cruise speed increase/decrease.");
+  QString accNoLongDescription = tr("This feature can only be used with openpilot longitudinal control enabled.");
+  if (has_longitudinal_control) {
+    customAccIncrement->setDescription(accEnabledDescription);
+    customAccIncrement->setEnabled(true);
+  } else {
+    customAccIncrement->setDescription(accNoLongDescription);
+    customAccIncrement->showDescription();
+    customAccIncrement->setEnabled(false);
+  }
 }
