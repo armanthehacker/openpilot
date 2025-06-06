@@ -52,7 +52,6 @@ def manager_init() -> None:
     ("CustomAccLongPressIncrement", "5"),
     ("CustomAccShortPressIncrement", "1"),
     ("DynamicExperimentalControl", "0"),
-    ("GasGating", "1"),
     ("HyundaiLongitudinalTuning", "0"),
     ("LagdToggle", "1"),
     ("Mads", "1"),
