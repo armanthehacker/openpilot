@@ -45,6 +45,7 @@ def manager_init() -> None:
     ("AccelPersonality", str(custom.LongitudinalPlanSP.AccelerationPersonality.stock)),
     ("AutoLaneChangeTimer", "0"),
     ("AutoLaneChangeBsmDelay", "0"),
+    ("BlindSpot", "0"),
     ("BlinkerMinLateralControlSpeed", "20"),  # MPH or km/h
     ("BlinkerPauseLateralControl", "0"),
     ("BlindSpot", "0"),
@@ -59,6 +60,7 @@ def manager_init() -> None:
     ("MadsSteeringMode", "0"),
     ("MadsUnifiedEngagementMode", "1"),
     ("MaxTimeOffroad", "1800"),
+    ("Brightness", "0"),
     ("ModelManager_LastSyncTime", "0"),
     ("ModelManager_ModelsCache", ""),
     ("NeuralNetworkLateralControl", "0"),
